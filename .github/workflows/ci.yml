@@ -1,0 +1,172 @@
+name: KitInspect CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        go: ['1.21']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Verify modules
+        run: go mod verify
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -v -race -coverprofile=coverage.txt ./...
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.txt
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  build:
+    name: Build Binaries
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Build all platforms
+        run: |
+          mkdir -p dist
+          VERSION=${GITHUB_REF_NAME:-dev}
+          COMMIT=$(git rev-parse --short HEAD)
+          LDFLAGS="-X main.Version=${VERSION} -X main.GitCommit=${COMMIT} -w -s"
+          GOOS=linux   GOARCH=amd64 go build -ldflags "${LDFLAGS}" -trimpath -o dist/kitinspect-linux-amd64 ./cmd/kitinspect/
+          GOOS=linux   GOARCH=arm64 go build -ldflags "${LDFLAGS}" -trimpath -o dist/kitinspect-linux-arm64 ./cmd/kitinspect/
+          GOOS=darwin  GOARCH=amd64 go build -ldflags "${LDFLAGS}" -trimpath -o dist/kitinspect-darwin-amd64 ./cmd/kitinspect/
+          GOOS=darwin  GOARCH=arm64 go build -ldflags "${LDFLAGS}" -trimpath -o dist/kitinspect-darwin-arm64 ./cmd/kitinspect/
+          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -trimpath -o dist/kitinspect-windows-amd64.exe ./cmd/kitinspect/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitinspect-binaries
+          path: dist/
+
+  docker:
+    name: Docker Image
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  release:
+    name: Create Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: kitinspect-binaries
+          path: dist/
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*
+          body: |
+            ## KitInspect ${{ github.ref_name }}
+
+            Professional APK Security Analysis Platform.
+
+            ### Installation
+            ```bash
+            # Linux
+            curl -Lo kitinspect https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kitinspect-linux-amd64
+            chmod +x kitinspect && sudo mv kitinspect /usr/local/bin/
+
+            # macOS (Apple Silicon)
+            curl -Lo kitinspect https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kitinspect-darwin-arm64
+            chmod +x kitinspect && sudo mv kitinspect /usr/local/bin/
+            ```
+
+            ### Verify
+            ```bash
+            sha256sum -c SHA256SUMS.txt
+            kitinspect version
+            ```
+          draft: false
+          prerelease: false

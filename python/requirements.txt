@@ -1,0 +1,12 @@
+# KitInspect Python dependencies
+# Core (always required)
+dataclasses; python_version < "3.7"
+
+# Optional: YARA integration
+# yara-python>=4.3.0
+
+# Optional: Enhanced reporting
+# jinja2>=3.1.0
+
+# Optional: ML features (lightweight)
+# numpy>=1.24.0

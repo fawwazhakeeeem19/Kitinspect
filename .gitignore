@@ -1,0 +1,13 @@
+kitinspect
+kitinspect.exe
+dist/
+data/
+*.db
+*.log
+coverage*
+*.out
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
