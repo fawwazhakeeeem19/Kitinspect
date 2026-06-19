@@ -5,8 +5,8 @@
   ██║ ██╔╝██║╚══██╔══╝██║████╗  ██║██╔════╝██╔══██╗██╔════╝██╔════╝╚══██╔══╝
   █████╔╝ ██║   ██║   ██║██╔██╗ ██║███████╗██████╔╝█████╗  ██║        ██║
   ██╔═██╗ ██║   ██║   ██║██║╚██╗██║╚════██║██╔═══╝ ██╔══╝  ██║        ██║
-  ██║  ██╗██║   ██║   ██║██║ ╚████║███████║██║      ███████╗╚██████╗  ██║
-  ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝      ╚══════╝ ╚═════╝  ╚═╝
+  ██║  ██╗██║   ██║   ██║██║ ╚████║███████║██║      ███████╗╚██████╗   ██║
+  ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝      ╚══════╝ ╚═════╝   ╚═╝
 ```
 
 **Professional Security Analysis Platform**
@@ -49,8 +49,8 @@
 ### Build dari Source
 
 ```bash
-git clone https://github.com/fawwaz.hakeeeem19/kitinspect.git
-cd kitinspect
+git clone https://github.com/fawwazhakeeeem19/Kitinspect.git
+cd Kitinspect
 go mod tidy
 go build -o Kitinspect ./cmd/
 ./Kitinspect version
