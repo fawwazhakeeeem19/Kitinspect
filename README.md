@@ -5,8 +5,8 @@
   ██║ ██╔╝██║╚══██╔══╝██║████╗  ██║██╔════╝██╔══██╗██╔════╝██╔════╝╚══██╔══╝
   █████╔╝ ██║   ██║   ██║██╔██╗ ██║███████╗██████╔╝█████╗  ██║        ██║
   ██╔═██╗ ██║   ██║   ██║██║╚██╗██║╚════██║██╔═══╝ ██╔══╝  ██║        ██║
-  ██║  ██╗██║   ██║   ██║██║ ╚████║███████║██║      ███████╗╚██████╗   ██║
-  ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝      ╚══════╝ ╚═════╝   ╚═╝
+  ██║  ██╗██║   ██║   ██║██║ ╚████║███████║██║     ███████╗╚██████╗  ██║
+  ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝ ╚═════╝  ╚═╝
 ```
 
 **Professional Security Analysis Platform**
@@ -159,14 +159,14 @@ Skor **0–100** (semakin tinggi = semakin berisiko):
 ```
 kitinspect/
 ├── cmd/
-│   └── main.go                      # CLI entry point
+│   └── main.go                  
 ├── internal/
 │   ├── config/
-│   │   └── config.go                # Konfigurasi
+│   │   └── config.go                
 │   ├── engine/file/
-│   │   └── analyzer.go              # Core analysis engine
+│   │   └── analyzer.go             
 │   └── output/
-│       └── renderer.go              # Terminal output
+│       └── renderer.go             
 ├── go.mod
 └── README.md
 ```
