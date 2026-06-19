@@ -183,11 +183,6 @@ KitInspect dibuat **khusus** untuk:
 - ✅ Penetration testing (dengan izin tertulis)
 - ✅ Edukasi keamanan siber
 
-**Tidak boleh digunakan untuk:**
-- ❌ Menganalisis aplikasi tanpa izin
-- ❌ Tujuan ofensif atau berbahaya
-
----
 
 ## License
 
